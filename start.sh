@@ -20,4 +20,3 @@ echo '🚀 Frontend React iniciado!'
 npm start
 exec bash
 "
-

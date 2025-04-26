@@ -5,10 +5,16 @@ from .models import Palavra
 
 class PerguntaAPIView(APIView):
     def get(self, request):
-        palavras = list(Palavra.objects.all())
+        dificuldade = request.query_params.get('dificuldade', None)
+        
+        palavras = Palavra.objects.all()
+        if dificuldade:
+            palavras = palavras.filter(dificuldade=dificuldade)
+        
+        palavras = list(palavras)
 
         if len(palavras) < 3:
-            return Response({"erro": "Você precisa ter pelo menos 3 palavras cadastradas no sistema."}, status=400)
+            return Response({"erro": "Você precisa ter pelo menos 3 palavras cadastradas para essa dificuldade."}, status=400)
 
         correta = random.choice(palavras)
         opcoes = random.sample([p.portugues for p in palavras if p != correta], 2)
@@ -17,7 +23,6 @@ class PerguntaAPIView(APIView):
 
         return Response({
             "pergunta": f"Qual o significado de '{correta.ingles}'?",
-            "palavra": correta.ingles,
             "opcoes": opcoes,
             "correta": opcoes.index(correta.portugues)
         })

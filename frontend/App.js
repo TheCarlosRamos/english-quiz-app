@@ -6,14 +6,18 @@ function App() {
   const [pergunta, setPergunta] = useState(null);
   const [respostaSelecionada, setRespostaSelecionada] = useState(null);
   const [pontuacao, setPontuacao] = useState(0);
+  const [fase, setFase] = useState("inicio");
+  const [dificuldade, setDificuldade] = useState("facil");
 
   useEffect(() => {
-    carregarPergunta();
-  }, []);
+    if (fase === "quiz") {
+      carregarPergunta();
+    }
+  }, [fase, dificuldade]);
 
   const carregarPergunta = () => {
     axios
-      .get("http://localhost:8000/api/pergunta/")
+      .get(`http://localhost:8000/api/pergunta/?dificuldade=${dificuldade}`)
       .then((res) => {
         setPergunta(res.data);
         setRespostaSelecionada(null);
@@ -28,13 +32,27 @@ function App() {
     }
   };
 
+  if (fase === "inicio") {
+    return (
+      <div className="app-container">
+        <h1>Quiz de Inglês</h1>
+        <h2>Escolha a dificuldade:</h2>
+        <div className="options-container">
+          <button className="card" onClick={() => { setDificuldade("facil"); setFase("quiz"); }}>Fácil</button>
+          <button className="card" onClick={() => { setDificuldade("medio"); setFase("quiz"); }}>Médio</button>
+          <button className="card" onClick={() => { setDificuldade("dificil"); setFase("quiz"); }}>Difícil</button>
+        </div>
+      </div>
+    );
+  }
+
   if (!pergunta) return <div>Carregando...</div>;
 
   return (
     <div className="app-container">
-      <h1>Quiz de Inglês</h1>
+      <h1>Quiz de Inglês - Dificuldade: {dificuldade}</h1>
       <div className="question-container">
-        <h2>Qual o significado de <strong>{pergunta.palavra}</strong>?</h2>
+        <h2>{pergunta.pergunta}</h2>
         <div className="options-container">
           {pergunta.opcoes.map((opcao, i) => (
             <div
